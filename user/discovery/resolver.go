@@ -33,6 +33,8 @@ type Resolver struct {
 	logger *logrus.Logger
 }
 
+// New一个注册的对象
+
 // NewResolver create a new resolver.Builder base on etcd
 func NewResolver(etcdAddrs []string, logger *logrus.Logger) *Resolver {
 	return &Resolver{

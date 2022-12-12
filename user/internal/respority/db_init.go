@@ -14,7 +14,6 @@ import (
 	"gorm.io/gorm/schema"
 	"strings"
 	"time"
-	// "github.com/txxzx/gRPC/user/pkg/util"
 )
 
 var DB *gorm.DB
@@ -35,13 +34,16 @@ func InitDB() {
 	}
 }
 
+// Gorm的定义
 func Database(connString string) error {
+	// 定义哟个输出日志
 	var ormLogger logger.Interface
 	if gin.Mode() == "debug" {
 		ormLogger = logger.Default.LogMode(logger.Info)
 	} else {
 		ormLogger = logger.Default
 	}
+
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:                       connString, // DSN data source name
 		DefaultStringSize:         256,      // string 类型字段的默认长度
@@ -56,13 +58,14 @@ func Database(connString string) error {
 		},
 	})
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(20)  //设置连接池，空闲
 	sqlDB.SetMaxOpenConns(100) //打开
 	sqlDB.SetConnMaxLifetime(time.Second * 30)
 	DB = db
-	// migration()
+	// 迁移函数
+	 migration()
 	return err
 }

@@ -1,4 +1,4 @@
-package cmd
+package main
 
 /**
     @date: 2022/12/12
@@ -8,21 +8,22 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/txxzx/gRPC/user/internal/service"
+
 	"google.golang.org/grpc"
 	"net"
 	"github.com/txxzx/gRPC/user/user/config"
 	"github.com/txxzx/gRPC/user/user/discovery"
 	"github.com/txxzx/gRPC/user/internal/respority"
-	"user/internal/service"
 )
 
 // 启动入口
 func main() {
 	// 初始化配置文件
 	config.InitConfig()
-	// 初始化数据库
-	repository.InitDB()
-	// etcd 地址
+	// 初始化数据
+	respority.InitDB()
+	// 取出etcd 地址 服务注册到etcd里面
 	etcdAddress := []string{viper.GetString("etcd.address")}
 	// 服务注册
 	etcdRegister := discovery.NewRegister(etcdAddress, logrus.New())
@@ -34,7 +35,8 @@ func main() {
 	}
 	server := grpc.NewServer()
 	defer server.Stop()
-	// 绑定service
+	// 绑定service服务
+
 	service.RegisterUserServiceServer(server, handler.NewUserService())
 	lis, err := net.Listen("tcp", grpcAddress)
 	if err != nil {
@@ -44,6 +46,7 @@ func main() {
 		panic(fmt.Sprintf("start server failed, err: %v", err))
 	}
 	logrus.Info("server started listen on ", grpcAddress)
+	// 对这个服务进行监听
 	if err := server.Serve(lis); err != nil {
 		panic(err)
 	}

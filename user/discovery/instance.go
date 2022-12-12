@@ -13,13 +13,15 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+// 服务实例
 type Server struct {
 	Name    string `json:"name"`    // 服务名字
-	Addr    string `json:"addr"`    // 地址
-	Version string `json:"version"` // 版本
-	Weight  int64  `json:"weight"`  // 权重
+	Addr    string `json:"addr"`    // 服务地址
+	Version string `json:"version"` // 服务版本
+	Weight  int64  `json:"weight"`  // 服务权重 降级处理需要用
 }
 
+// 获取服务构建的前缀
 func BuildPrefix(server Server) string {
 	if server.Version == "" {
 		return fmt.Sprintf("/%s/", server.Name)
@@ -28,12 +30,12 @@ func BuildPrefix(server Server) string {
 	return fmt.Sprintf("/%s/%s/", server.Name, server.Version)
 }
 
-// 获取服务构建的前缀
+// 拼接服务路径
 func BuildRegisterPath(server Server) string {
 	return fmt.Sprintf("%s%s", BuildPrefix(server), server.Addr)
 }
 
-// 解析服务结构
+// 解析服务结构信息反序列化
 func ParseValue(value []byte) (Server, error) {
 	server := Server{}
 	if err := json.Unmarshal(value, &server); err != nil {
@@ -43,7 +45,7 @@ func ParseValue(value []byte) (Server, error) {
 	return server, nil
 }
 
-// 解析服务路径
+// 切割服务的路径
 func SplitPath(path string) (Server, error) {
 	server := Server{}
 
@@ -58,7 +60,7 @@ func SplitPath(path string) (Server, error) {
 	return server, nil
 }
 
-// Exist helper function
+// Exist helper function 判断服务路径是否存在雷保中
 func Exist(l []resolver.Address, addr resolver.Address) bool {
 	for i := range l {
 		if l[i].Addr == addr.Addr {
